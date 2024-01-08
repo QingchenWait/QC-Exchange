@@ -1,8 +1,5 @@
-# V1.0.7 版本
-# - 新增：读取/失败状态图片、软件图标
-# - 改进：修改手动刷新按钮点击事件，进行线程分离，以避免无数据时主线程卡死导致窗口无响应
-# - 改进：修改因未联网等原因，获取不到数据时的时间逻辑
-# - 改进：在手动读取过程中，显示加载中的状态图片
+# V1.0.8 版本
+# - 改进：修改汇率变动率计算逻辑，使用上一次自动刷新得到的汇率牌价作为对比基准，而不是从接口获取到的第二个牌价
 
 
 import socket
@@ -83,7 +80,6 @@ class Runthread_1(QtCore.QThread):
     def run(self):
         self.qmut.lock()  # 进程锁
         for i in range(999999):
-            # 创建 30 分钟 (1800s) 循环，作为倒计时
             for step in range(0, 1800):
                 extra_sec = 1800 - step
                 ex_min, ex_sec = divmod(extra_sec, 60)
@@ -140,9 +136,11 @@ class MainWindow(QMainWindow):
         self.start_img_path = './images/loading_ui.png'
         self.cached_img_path = './images/cache_price.png'
         self.error_img_path = './images/error_ui.png'
+        self.cached_price = 0.0
+
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowIcon(QIcon('./images/icon.png'))  # 设置图标
+        self.setWindowIcon(QIcon('./images/icon.png'))
         # 读入加载图片
         image_loading = QPixmap(self.start_img_path)  # 将图片路径转化为 QPixmap 形式
         self.ui.plotLabel.setPixmap(image_loading)
@@ -172,6 +170,13 @@ class MainWindow(QMainWindow):
         price_now = (str(price).split(","))[0]
         price_last = (str(price).split(","))[1]
         current_time = (str(price).split(","))[2]
+        # [V1.0.8 修改]: 读取上一次刷新时缓存的牌价，作为 price_last 计算。若未缓存过，则使用 bocfx() 的历史牌价计算。
+        if self.cached_price != 0.0:
+            price_last = self.cached_price
+            print("Cached price:", self.cached_price)
+        else:
+            print("No cached price, use bocfx() price")
+
         self.ui.priceLabel.setText(price_now)
         # 在窗口中显示当天汇率变动图片, 若没有获取到数据则显示报错图片
         if "错误" in current_time:
@@ -198,6 +203,8 @@ class MainWindow(QMainWindow):
         else:
             self.ui.ChangRateLabel.setText("(+" + str(change_rate) + "%)")
             self.ui.ChangRateLabel.setStyleSheet("color:red")
+        # 将新的汇率牌价写入缓存，等待下一次调用
+        self.cached_price = price_now
 
         return 0
 
