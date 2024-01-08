@@ -26,13 +26,13 @@
    pip3 install bocfx
    pip3 install PyQt5
    ```
-3. 运行 ```AUD2CNY_V107_main.py``` 文件，即可使用软件。
+3. 运行 ```AUD2CNY_V108_main.py``` 文件，即可使用软件。
 
      <img src="https://github.com/QingchenWait/QC-Exchange/blob/main/images/Guide_2_pycharm.png?raw=true" alt="2_pycharm.png" style="zoom: 40%;" />
 
 #### 2.2 文件树
 - **/images** ：存放图片资源。
-- **AUD2CNY_V107_main.py**：软件主程序。
+- **AUD2CNY_V108_main.py**：软件主程序。
 - **AUD2CNY_MainWindow_V107.py**：PyQt GUI 控件定义及绘制源码，使用 PyUIC 生成。
 - **AUD2CNY_MainWindow_V107.ui**：Qt 窗口样式文件，可使用 Qt Designer 打开及编辑。
 
